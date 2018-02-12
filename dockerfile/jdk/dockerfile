@@ -1,0 +1,5 @@
+FROM ubuntu
+MAINTAINER lstar <442132099@qq.com>
+ADD sources.list /etc/apt/sources.list
+RUN apt-get update && apt-get install -y openjdk-8-jdk && apt-get clean
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64

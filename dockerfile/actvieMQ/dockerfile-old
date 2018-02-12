@@ -1,0 +1,9 @@
+FROM ubuntu
+MAINTAINER lstar 442132099@qq.com
+RUN apt-get update && apt-get install -y openjdk-8-jdk
+ADD apache-activemq-5.13.3-bin.tar.gz ./
+RUN tar xf apache-activemq-5.13.3-bin.tar.gz -C /usr/local
+RUN rm -f apache-activemq-5.13.3-bin.tar.gz
+RUN mv /usr/local/apache-activemq-5.13.3  /usr/local/activemq
+EXPOSE 8161
+ENTRYPOINT /usr/bin/java -Xms64M -Xmx1G -Djava.util.logging.config.file=logging.properties -Djava.security.auth.login.config=/usr/local/activemq//conf/login.config -Dcom.sun.management.jmxremote -Djava.awt.headless=true -Djava.io.tmpdir=/usr/local/activemq//tmp -Dactivemq.classpath=/usr/local/activemq//conf:/usr/local/activemq//../lib/: -Dactivemq.home=/usr/local/activemq/ -Dactivemq.base=/usr/local/activemq/ -Dactivemq.conf=/usr/local/activemq//conf -Dactivemq.data=/usr/local/activemq//data -jar /usr/local/activemq//bin/activemq.jar start

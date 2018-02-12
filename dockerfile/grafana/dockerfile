@@ -1,0 +1,9 @@
+FROM 192.168.0.45:5000/grafana:4.1.1base
+MAINTAINER lstar <442132099@qq.com>
+ADD grafana.ini /etc/grafana/grafana.ini
+ADD run.sh .
+#添加时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+#VOLUME ["/usr/local/tomcat/webapps/ROOT/img/user"]
+ENTRYPOINT ["/run.sh"]

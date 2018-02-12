@@ -1,0 +1,16 @@
+FROM 172.16.74.150:5000/base
+MAINTAINER lstar 442132099@qq.com
+ADD kafka_2.11-0.11.0.0.tgz .
+#ADD start.sh /usr/bin/start.sh
+RUN mv kafka_2.11-0.11.0.0 /usr/local/kafka && mkdir /data
+ADD server.properties /usr/local/kafka/config/server.properties
+#ADD zoo.cfg /usr/local/kafka/conf/zoo.cfg 
+###添加时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+EXPOSE 9092
+##VOLUME [/etc/redis]
+ADD start-kafka.sh /usr/bin/start-kafka.sh
+##ENTRYPOINT ["/bin/bash -c","/usr/bin/start.sh"]
+ENTRYPOINT ["/usr/bin/start-kafka.sh"]
+##ENTRYPOINT ["/usr/bin/supervisord"]

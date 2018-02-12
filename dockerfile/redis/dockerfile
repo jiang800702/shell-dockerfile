@@ -1,0 +1,24 @@
+FROM 192.168.0.45:5000/basenojdk
+MAINTAINER lstar 442132099@qq.com
+ADD redis-3.2.8.tar.gz .
+#ADD redis-3.3.3.gem ./
+RUN groupadd -r redis && useradd -r -g redis redis
+RUN apt-get update&& apt-get install -y gcc make tcl rsyslog && \
+    mv redis-3.2.8 /usr/local/redis && \
+    cd /usr/local/redis && make && make install && \
+    mkdir /var/log/redis && mkdir /etc/redis && gem install redis && \
+    cp /usr/local/redis/src/redis-trib.rb /usr/bin && \
+    rm -rf /var/cache/apt/archives/*
+COPY *.conf /etc/
+#ADD sysctl.conf /etc/sysctl.conf
+#RUN mkdir /var/log/redis
+#ADD run.sh .
+#ADD docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+#添加时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+EXPOSE 6379
+VOLUME [/etc/redis]
+ADD cluster.sh /usr/bin/cluster.sh
+#ENTRYPOINT ["redis-server","/etc/redis.conf"]
+ENTRYPOINT ["/usr/bin/supervisord"]

@@ -1,0 +1,203 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: elking
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: elking
+  labels:
+    app: elasticsearch
+    component: elasticsearch
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: elasticsearch
+      labels:
+        app: elasticsearch
+        component: elasticsearch
+    spec:
+      containers:
+      - image: 192.168.0.45:5000/elasticsearch:5.6.2
+       # resources:
+       #   requests:
+       #     cpu: 1
+       #     memory: 500Mi
+       #   limits:
+       #     cpu: 2
+       #     memory: 8Gi
+        name: elasticsearch
+        ports:
+        - name: elasticsearch
+          containerPort: 9200
+        volumeMounts:
+        - name: elasticsearchdata
+          mountPath: /var/lib/elasticsearch
+        - name: elasticsearchlogs
+          mountPath: /var/log/elasticsearch
+      volumes:
+      - name: elasticsearchdata
+        hostPath:
+          path: /var/lib/elasticsearch
+      - name: elasticsearchlogs
+        hostPath:
+          path: /var/log/elasticsearch
+      nodeSelector:
+        roleELK: elk-es
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: elking
+  labels:
+    app: elasticsearch
+    component: elasticsearch
+spec:
+  type: NodePort
+  ports:
+    - port: 9200
+      protocol: TCP
+      name: elasticsearch
+      nodePort: 9200
+  selector:
+    app: elasticsearch
+    component: elasticsearch
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: logstash
+  namespace: elking
+  labels:
+    app: logstash
+    component: logstash
+spec:
+  template:
+    metadata:
+      name: logstash
+      labels:
+        app: logstash
+        component: logstash
+    spec:
+      hostNetwork: true
+      containers:
+      - image: 192.168.0.45:5000/logstash:5.6.2
+        resources:
+          requests:
+            cpu: 1
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 2Gi
+        name: logstash
+        ports:
+        - name: logstash
+          #^ must be an IANA_SVC_NAME (at most 15 characters, ..)
+          containerPort: 9600
+          hostPort: 9600
+       # env:
+       # - name: ELASTICSEARCH_SERVICE_HOST
+       #   value: "192.168.0.30"
+        volumeMounts:
+        - name: appslogs
+          mountPath: /opt
+        - name: logstashlogs
+          mountPath: /var/log/logstash
+      volumes:
+      - name: appslogs
+        hostPath:
+          path: /opt
+      - name: logstashlogs
+        hostPath:
+          path: /var/log/logstash
+#      nodeSelector:
+#        roleELK: elk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  #annotations:
+  #  logstash.io/scrape: 'true'
+  name: logstash
+  namespace: elking
+  labels:
+    app: logstash
+    component: logstash
+spec:
+  clusterIP: None
+  ports:
+    - name: logstash
+      port: 9600
+      protocol: TCP
+  selector:
+    app: logstash
+    component: logstash
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: elking
+  labels:
+    app: kibana
+    component: kibana
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: kibana
+      labels:
+        app: kibana
+        component: kibana
+    spec:
+      containers:
+      - image: 192.168.0.45:5000/kibana:5.6.2
+       # resources:
+       #   requests:
+       #     cpu: 1
+       #     memory: 500Mi
+       #   limits:
+       #     cpu: 2
+       #     memory: 8Gi
+        name: kibana
+        ports:
+        - name: kibana
+          containerPort: 5601
+        volumeMounts:
+        - name: kibanadata
+          mountPath: /var/lib/kibana
+        - name: kibanalogs
+          mountPath: /var/log/kibana
+      volumes:
+      - name: kibanadata
+        hostPath:
+          path: /var/lib/kibana
+      - name: kibanalogs
+        hostPath:
+          path: /var/log/kibana
+      nodeSelector:
+        roleELK: elk-es
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: elking
+  labels:
+    app: kibana
+    component: kibana
+spec:
+  type: NodePort
+  ports:
+    - port: 5601
+      protocol: TCP
+      name: kibana
+      nodePort: 5601
+  selector:
+    app: kibana
+    component: kibana

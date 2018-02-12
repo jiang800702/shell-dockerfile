@@ -1,0 +1,18 @@
+FROM 192.168.0.45:5000/base
+MAINTAINER lstar 442132099@qq.com
+ADD sources.list /etc/apt/sources.list
+RUN apt-get update && apt-get install -y openjdk-8-jdk elasticsearch --allow-unauthenticated
+#RUN cp -r /etc/elasticsearch /usr/share/elasticsearch/config
+#ADD elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
+ADD elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+#RUN mkdir -p /var/log/elasticsearch/logs && mkdir -p /var/lib/elasticsearch/data && \
+#chown -R elasticsearch:elasticsearch /var/log/elasticsearch/logs /var/lib/elasticsearch /etc/elasticsearch
+RUN chown -R elasticsearch:elasticsearch /etc/elasticsearch
+ADD elasticsearch /etc/init.d/elasticsearch
+###添加时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+EXPOSE 9200
+##VOLUME [/data]
+ADD run.sh .
+ENTRYPOINT [ "/run.sh"]

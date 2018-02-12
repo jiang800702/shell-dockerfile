@@ -1,0 +1,11 @@
+FROM ubuntu-jdk:1.8
+MAINTAINER lstar <442132099@qq.com>
+ADD run.sh .
+ADD apache-activemq-5.13.3-bindianxin.tar.gz ./
+RUN mv apache-activemq-5.13.3 /usr/local/activemq
+#添加时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+EXPOSE 8161 61616
+VOLUME ["/usr/local/activemq/data"]
+ENTRYPOINT ["/run.sh"]
