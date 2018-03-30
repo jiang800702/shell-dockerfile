@@ -1,6 +1,6 @@
 FROM alpine
 MAINTAINER lstar <442132099@qq.com>
-RUN apk update && apk add mariadb bash mariadb-client nginx supervisor libpng-dev freetype-dev tcl-dev tk-dev openldap-dev \
+RUN apk update && apk add mariadb bash mariadb-client nginx supervisor openssh libpng-dev freetype-dev tcl-dev tk-dev openldap-dev \
     libc-dev mariadb-client-libs redis mariadb-dev gcc make tiff-dev sshpass krb5-dev openldap-dev linux-headers python-dev libffi-dev && \
     rm -rf /var/cache/apk/* 
 RUN wget -O /tmp/Python-3.6.4.tgz http://192.168.0.45/jumpserver-1.0/Python-3.6.4.tgz && \ 

@@ -1,5 +1,31 @@
 #!/bin/bash
 set -e
+if [ ! -f /data/ssh/passwd ];then
+	mkdir -p /data/ssh
+	cp /etc/passwd /data/ssh/passwd
+	rm -f /etc/passwd
+	ln -sf /data/ssh/passwd /etc/passwd
+else
+	rm -f /etc/passwd
+        ln -sf /data/ssh/passwd /etc/passwd
+fi
+if [ ! -f /data/ssh/shadow ];then
+	cp /etc/shadow /data/ssh/shadow 
+	rm -f /etc/shadow
+	ln -sf /data/ssh/shadow /etc/shadow
+else
+	rm -f /etc/shadow
+        ln -sf /data/ssh/shadow /etc/shadow
+fi
+if [  ! -f /data/ssh/sshkey ];then
+	mkdir -p /data/ssh/sshkey
+	cp -r /etc/ssh/* /data/ssh/sshkey/
+	rm -rf /etc/ssh
+	ln -sf /data/ssh/sshkey /etc/ssh
+else
+	rm -rf /etc/ssh
+        ln -sf /data/ssh/sshkey /etc/ssh
+fi
 cat >/etc/redis.sh<<EOF
 #!/bin/bash
 #redis start
@@ -96,7 +122,7 @@ while true;do
   fi
 done
 if [ "\$MYSQL_PASSWORD" == "" ];then
-        MYSQL_PASSWORD="ae108Abe&f9"
+        MYSQL_PASSWORD="j#456mYs"
 fi
 if [  ! -d /var/lib/mysql/jumpserver ];then
         /usr/bin/mysql -e "CREATE DATABASE jumpserver CHARACTER SET UTF8;"
