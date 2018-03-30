@@ -1,0 +1,26 @@
+FROM alpine
+MAINTAINER lstar <442132099@qq.com>
+RUN apk update && apk add mariadb bash mariadb-client nginx supervisor libpng-dev freetype-dev tcl-dev tk-dev openldap-dev \
+    libc-dev mariadb-client-libs redis mariadb-dev gcc make tiff-dev krb5-dev openldap-dev linux-headers python-dev libffi-dev && \
+    rm -rf /var/cache/apk/* 
+RUN wget -O /tmp/Python-3.6.4.tgz http://192.168.0.45/jumpserver-1.0/Python-3.6.4.tgz && \ 
+    cd /tmp && tar xf Python-3.6.4.tgz && cd Python-3.6.4 && ./configure && make && make install && rm -rf /tmp/* && \
+    mkdir /opt && cd /opt && python3.6 -m venv py3 
+
+COPY jumpserver-1.0.0/. /opt
+WORKDIR /opt
+
+RUN pip3.6 install --upgrade pip && \
+    ln -sf /usr/lib/python3.6/configparser.py /usr/lib/python3.6/ConfigParser.py && \
+    pip install -r /opt/jumpserver/requirements/requirements.txt && \
+    sed -i 's?asn1crypto==0.23.0?asn1crypto==0.24.0?g' /opt/coco/requirements/requirements.txt && \
+    sed -i 's?PyNaCl==1.2.0?PyNaCl==1.2.1?g' /opt/coco/requirements/requirements.txt && \
+    pip install -r /opt/coco/requirements/requirements.txt && \ 
+    rm -rf /root/.cache
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+#RUN echo "net.core.somaxconn = 511" >>/etc/sysctl.d/00-alpine.conf 
+ADD alpine.sh /alpine.sh
+VOLUME /data
+EXPOSE 80 22 3306 8080
+ENTRYPOINT [ "/bin/bash","/alpine.sh" ]
