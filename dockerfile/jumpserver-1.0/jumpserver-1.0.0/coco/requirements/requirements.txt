@@ -39,6 +39,6 @@ s3transfer==0.1.13
 simplejson==3.13.2
 six==1.11.0
 tornado==4.5.2
-urllib3==1.22
+urllib3==1.26.5
 wcwidth==0.1.7
 Werkzeug==0.12.2
